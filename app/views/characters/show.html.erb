@@ -1,0 +1,39 @@
+<%= render "logo" %>
+<div class="container">
+  <div class="illustration-form-container position-fixed z-3<%= ' with-illustrations' if @illustrations.present? %><%= ' with-photo' if @character.respond_to?(:photo) && @character.photo.attached? %>">
+    <% if @character.respond_to?(:photo) %>
+      <%= cl_image_tag @character.photo.key, width: 150, height: 150, crop: :thumb, gravity: :face, class: 'avatar' %>
+    <% end %>
+    <%= form_tag(character_illustrations_path(@character), method: :post) do %>
+      <div class="form-inputs">
+        <%= text_field :situation, nil, placeholder: 'What should your hero be doing?', class: 'w-100 p-1' %>
+      </div>
+      <div class="form-actions">
+        <%= submit_tag 'Heroify!', class: 'btn btn-primary w-100' %>
+      </div>
+    <% end %>
+  </div>
+  <div class="vw-100 vh-100 position-fixed top-0 start-0 z-n1">
+    <% if @illustrations.present? %>
+      <div class="character-grid">
+        <% @illustrations.each_with_index do |illustration, idx| %>
+          <div class="position-relative grid-item <%= 'featured' if featured?(illustration.id, idx) %>">
+            <%= link_to character_path(illustration.record, featured: illustration.id) do %>
+              <%= cl_image_tag illustration.key, class: "w-100 shadow-1-strong rounded" %>
+            <% end %>
+            <%= link_to cloudinary_url(illustration.key), class: 'position-absolute top-0 end-0 m-2', target: :blank do %>
+              <i class="fa-solid fa-download"></i>
+            <% end %>
+            <%= link_to illustration_path(illustration.id), method: :delete,
+                        data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' },
+                        class: 'position-absolute bottom-0 end-0 m-2' do %>
+              <i class="fa-solid fa-skull-crossbones"></i>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <%= image_tag 'no_images.png', style: 'object-fit: cover', class: 'w-100 vh-100 shadow' %>
+    <% end %>
+  </div>
+</div>
